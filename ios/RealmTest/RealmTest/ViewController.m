@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "RealmManager.h"
+#import "LeakReference.h"
 
 
 @interface ViewController ()
@@ -29,22 +30,9 @@
 }
 
 
-- (IBAction)onAddRealmInstance:(id)sender {
+- (IBAction)onAddEntities:(id)sender {
+    RLMRealm *realm = [RealmManager realm];
     for (int i = 0; i < 1000; i++) {
-        RLMRealm *realm = [RealmManager realmInstance];
-        [realm transactionWithBlock:^{
-            TestEntity *entity = [RealmManager entityFromRealm:realm];
-            entity.id = i;
-            entity.title = [NSString stringWithFormat:@"title%d", i];
-            entity.desc = [NSString stringWithFormat:@"desc%d", i];
-        }
-                              error:nil];
-    }
-}
-
-- (IBAction)onAddRealmSingleInstance:(id)sender {
-    for (int i = 0; i < 1000; i++) {
-        RLMRealm *realm = [RealmManager realmSingleInstance];
         [realm transactionWithBlock:^{
             TestEntity *entity = [RealmManager entityFromRealm:realm];
             entity.id = i;
@@ -56,37 +44,43 @@
 }
 
 - (IBAction)onDeleteEntities:(id)sender {
-    RLMRealm *realm = [RealmManager realmInstance];
+    RLMRealm *realm = [RealmManager realm];
     RLMResults<TestEntity *> *results = [TestEntity allObjectsInRealm:realm];
     NSUInteger count = results.count;
     if (count > 1000) {
         count = 1000;
     }
 
+    NSMutableArray *entities = [NSMutableArray arrayWithCapacity:count];
     for (int i = 0; i < count; i++) {
-        [realm transactionWithBlock:^{
-            [realm deleteObject:results[i]];
-        }];
+        [entities addObject:results[i]];
     }
-}
 
-- (IBAction)onDeleteEntitiesSingle:(id)sender {
-    RLMRealm *realm = [RealmManager realmSingleInstance];
-    RLMResults<TestEntity *> *results = [TestEntity allObjectsInRealm:realm];
-    NSUInteger count = results.count;
-    if (count > 1000) {
-        count = 1000;
-    }
-    
     for (int i = 0; i < count; i++) {
         [realm transactionWithBlock:^{
-            [realm deleteObject:results[i]];
+                [realm deleteObject:entities[i]];
         }];
     }
 }
 
 - (IBAction)onCompactRealm:(id)sender {
     [RealmManager compactRealm];
+}
+
+- (IBAction)onCreateLeak:(id)sender {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0UL), ^{
+        LeakReference *leak1 = [[LeakReference alloc] init];
+        LeakReference *leak2 = [[LeakReference alloc] init];
+
+        RLMRealm *realm = [RealmManager realm];
+        [realm transactionWithBlock:^{
+            leak1.entity = [RealmManager entityFromRealm:realm];
+            leak2.entity = [RealmManager entityFromRealm:realm];
+        }];
+
+        leak1.reference = leak2;
+        leak2.reference = leak1;
+    });
 }
 
 @end

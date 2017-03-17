@@ -11,45 +11,62 @@
 
 @implementation RealmManager
 
-+ (void)compactRealm {
-    NSError *error;
++ (BOOL)compactRealm {
+    BOOL result = NO;
 
-    RLMRealm *realm = [RealmManager realmInstance];
     NSURL *fileUrl = [[RLMRealmConfiguration defaultConfiguration] fileURL];
-    NSURL *copyUrl = [NSURL fileURLWithPath:[fileUrl.path stringByAppendingString:@".copy"]];
+    NSURL *tmpUrl = [NSURL fileURLWithPath:[fileUrl.path stringByAppendingString:@".tmp"]];
+
+    NSError *error;
+    NSFileManager *manager = [NSFileManager defaultManager];
+
+    if ([manager fileExistsAtPath:[tmpUrl path]]) {
+        error = nil;
+        if (![manager removeItemAtURL:tmpUrl
+                                error:&error]) {
+            // log error
+            return NO;
+        }
+    }
 
     error = nil;
-    [[NSFileManager defaultManager] removeItemAtURL:copyUrl
-                                              error:&error];
+    if (![[RLMRealm defaultRealm] writeCopyToURL:tmpUrl
+                                   encryptionKey:nil
+                                           error:&error]) {
+        // log error
+        return NO;
+    }
 
     error = nil;
-    [realm writeCopyToURL:copyUrl
-            encryptionKey:nil
-                    error:&error];
+    if ([manager removeItemAtURL:fileUrl
+                           error:&error]) {
+        if ([manager moveItemAtURL:tmpUrl
+                         toURL:fileUrl
+                             error:&error]) {
+            result = YES;
+        } else {
+            // log error
+        }
+    } else {
+        // log error
+    }
 
-    error = nil;
-    [[NSFileManager defaultManager] removeItemAtURL:fileUrl
-                                              error:&error];
-
-    error = nil;
-    [[NSFileManager defaultManager] moveItemAtURL:copyUrl
-                                            toURL:fileUrl
-                                            error:&error];
+    return result;
 }
 
-+ (RLMRealm *)realmSingleInstance {
-    static RLMRealm *realm;
 
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        realm = [RLMRealm defaultRealm];
-    });
++ (RLMRealm *)realm {
+    RLMRealm *realm = [RLMRealm defaultRealm];
+    NSURL *dbPath = [[RLMRealmConfiguration defaultConfiguration] fileURL];
+    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:dbPath.path
+                                                                                error:nil];
+    NSNumber *fileSize = [attributes objectForKey:NSFileSize];
+
+//    NSLog(@"Realm DB Path : %@", dbPath);
+    NSLog(@"Realm DB Size: %lld bytes", [fileSize longLongValue]);
+    NSLog(@"Realm Instance: %@", [NSValue valueWithPointer:(__bridge const void *) realm]);
 
     return realm;
-}
-
-+ (RLMRealm *)realmInstance {
-    return [RLMRealm defaultRealm];
 }
 
 
