@@ -13,10 +13,9 @@
 
 @interface RealmManager : NSObject
 
-+ (void)compactRealm;
++ (BOOL)compactRealm;
 
-+ (RLMRealm *)realmSingleInstance;
-+ (RLMRealm *)realmInstance;
++ (RLMRealm *)realm;
 
 + (TestEntity *)entityFromRealm:(RLMRealm *)realm;
 

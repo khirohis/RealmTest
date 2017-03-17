@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8A442C211E7BE8B900A20EFA /* LeakReference.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A442C201E7BE8B900A20EFA /* LeakReference.m */; };
 		8AFFCD0F1E78FA2100DB5F0E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AFFCD0E1E78FA2100DB5F0E /* main.m */; };
 		8AFFCD121E78FA2100DB5F0E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AFFCD111E78FA2100DB5F0E /* AppDelegate.m */; };
 		8AFFCD151E78FA2100DB5F0E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AFFCD141E78FA2100DB5F0E /* ViewController.m */; };
@@ -33,6 +34,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8A442C1F1E7BE8B900A20EFA /* LeakReference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeakReference.h; sourceTree = "<group>"; };
+		8A442C201E7BE8B900A20EFA /* LeakReference.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeakReference.m; sourceTree = "<group>"; };
 		8AFFCD0A1E78FA2100DB5F0E /* RealmTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RealmTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AFFCD0E1E78FA2100DB5F0E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8AFFCD101E78FA2100DB5F0E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -88,6 +91,8 @@
 				8AFFCD261E78FBB900DB5F0E /* RealmManager.m */,
 				8AFFCD291E78FD9000DB5F0E /* TestEntity.h */,
 				8AFFCD2A1E78FD9000DB5F0E /* TestEntity.m */,
+				8A442C1F1E7BE8B900A20EFA /* LeakReference.h */,
+				8A442C201E7BE8B900A20EFA /* LeakReference.m */,
 				8AFFCD161E78FA2100DB5F0E /* Main.storyboard */,
 				8AFFCD191E78FA2100DB5F0E /* Assets.xcassets */,
 				8AFFCD1B1E78FA2100DB5F0E /* LaunchScreen.storyboard */,
@@ -179,6 +184,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A442C211E7BE8B900A20EFA /* LeakReference.m in Sources */,
 				8AFFCD151E78FA2100DB5F0E /* ViewController.m in Sources */,
 				8AFFCD2B1E78FD9000DB5F0E /* TestEntity.m in Sources */,
 				8AFFCD271E78FBB900DB5F0E /* RealmManager.m in Sources */,
@@ -348,6 +354,7 @@
 				8AFFCD231E78FA2100DB5F0E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
