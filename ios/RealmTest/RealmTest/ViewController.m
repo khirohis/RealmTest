@@ -31,6 +31,8 @@
     [self addChildViewController:self.childViewController];
     [self.view addSubview:self.childViewController.view];
     [self.childViewController didMoveToParentViewController:self];
+    
+//    [self.childViewController reload];
 }
 
 
@@ -42,17 +44,22 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
 
-    NSLog(@"containerView.frame: %@", NSStringFromCGRect(self.containerView.frame));
     self.childViewController.view.frame = self.containerView.frame;
 }
 
 
 - (IBAction)onAddEntities:(id)sender {
-    [RealmManager addEntities];
+//    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0UL), ^{
+        [RealmManager addEntities];
+    });
 }
 
 - (IBAction)onDeleteEntities:(id)sender {
-    [RealmManager deleteEntities];
+//    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0UL), ^{
+        [RealmManager deleteEntities];
+    });
 }
 
 - (IBAction)onCompactRealm:(id)sender {
