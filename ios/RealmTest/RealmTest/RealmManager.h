@@ -18,5 +18,7 @@
 + (RLMRealm *)realm;
 
 + (TestEntity *)entityFromRealm:(RLMRealm *)realm;
++ (void)addEntities;
++ (void)deleteEntities;
 
 @end

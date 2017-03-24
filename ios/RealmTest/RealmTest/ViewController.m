@@ -7,11 +7,16 @@
 //
 
 #import "ViewController.h"
+#import "ArrayTableViewController.h"
 #import "RealmManager.h"
 #import "LeakReference.h"
 
 
 @interface ViewController ()
+
+@property (weak, nonatomic) IBOutlet UIView *containerView;
+@property (nonatomic) ArrayTableViewController *childViewController;
+@property (nonatomic) TestEntity *entityReference;
 
 @end
 
@@ -20,47 +25,34 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+
+    self.childViewController = [[ArrayTableViewController alloc] initWithNibName:@"ArrayTableViewController"
+                                                                          bundle:nil];
+    [self addChildViewController:self.childViewController];
+    [self.view addSubview:self.childViewController.view];
+    [self.childViewController didMoveToParentViewController:self];
 }
 
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+}
+
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+
+    NSLog(@"containerView.frame: %@", NSStringFromCGRect(self.containerView.frame));
+    self.childViewController.view.frame = self.containerView.frame;
 }
 
 
 - (IBAction)onAddEntities:(id)sender {
-    RLMRealm *realm = [RealmManager realm];
-    for (int i = 0; i < 1000; i++) {
-        [realm transactionWithBlock:^{
-            TestEntity *entity = [RealmManager entityFromRealm:realm];
-            entity.id = i;
-            entity.title = [NSString stringWithFormat:@"title%d", i];
-            entity.desc = [NSString stringWithFormat:@"desc%d", i];
-        }
-                              error:nil];
-    }
+    [RealmManager addEntities];
 }
 
 - (IBAction)onDeleteEntities:(id)sender {
-    RLMRealm *realm = [RealmManager realm];
-    RLMResults<TestEntity *> *results = [TestEntity allObjectsInRealm:realm];
-    NSUInteger count = results.count;
-    if (count > 1000) {
-        count = 1000;
-    }
-
-    NSMutableArray *entities = [NSMutableArray arrayWithCapacity:count];
-    for (int i = 0; i < count; i++) {
-        [entities addObject:results[i]];
-    }
-
-    for (int i = 0; i < count; i++) {
-        [realm transactionWithBlock:^{
-                [realm deleteObject:entities[i]];
-        }];
-    }
+    [RealmManager deleteEntities];
 }
 
 - (IBAction)onCompactRealm:(id)sender {
@@ -81,6 +73,17 @@
         leak1.reference = leak2;
         leak2.reference = leak1;
     });
+}
+
+- (IBAction)onRetainReleaseReference:(id)sender {
+    if (self.entityReference != nil) {
+        self.entityReference = nil;
+    } else {
+        RLMRealm *realm = [RealmManager realm];
+        [realm transactionWithBlock:^{
+            self.entityReference = [[TestEntity allObjects] firstObject];
+        }];
+    }
 }
 
 @end
