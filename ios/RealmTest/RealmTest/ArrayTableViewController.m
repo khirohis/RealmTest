@@ -24,8 +24,6 @@
 
     [self.tableView registerClass:[UITableViewCell class]
            forCellReuseIdentifier:@"UITableViewCell"];
-
-    [self reload];
 }
 
 - (void)didReceiveMemoryWarning {

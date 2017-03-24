@@ -9,6 +9,9 @@
 #import "RealmManager.h"
 
 
+static const int LOOP_COUNT = 100;
+
+
 @implementation RealmManager
 
 + (BOOL)compactRealm {
@@ -56,7 +59,19 @@
 
 
 + (RLMRealm *)realm {
+    static NSMutableDictionary *mainDictionary;
+    static NSMutableDictionary *workerDictionary;;
+
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        mainDictionary = @{}.mutableCopy;
+        workerDictionary = @{}.mutableCopy;
+    });
+
     RLMRealm *realm = [RLMRealm defaultRealm];
+
+    // Realm instance information
+    NSValue *pointer = [NSValue valueWithPointer:(__bridge const void *) realm];
     NSURL *dbPath = [[RLMRealmConfiguration defaultConfiguration] fileURL];
     NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:dbPath.path
                                                                                 error:nil];
@@ -64,7 +79,21 @@
 
     NSLog(@"Realm DB Path : %@", dbPath);
     NSLog(@"Realm DB Size: %lld bytes", [fileSize longLongValue]);
-    NSLog(@"Realm Instance: %@", [NSValue valueWithPointer:(__bridge const void *) realm]);
+    if ([NSThread isMainThread]) {
+        if (mainDictionary[pointer] != nil) {
+            NSLog(@"--- Main  : Exists Realm Instance: %@", pointer);
+        } else {
+            mainDictionary[pointer] = [NSNumber numberWithBool:YES];
+            NSLog(@"--- Main  : New Realm Instance   : %@", pointer);
+        }
+    } else {
+        if (workerDictionary[pointer] != nil) {
+            NSLog(@"--- Worker: Exists Realm Instance: %@", pointer);
+        } else {
+            workerDictionary[pointer] = [NSNumber numberWithBool:YES];
+            NSLog(@"--- Worker: New Realm Instance   : %@", pointer);
+        }
+    }
 
     return realm;
 }
@@ -78,8 +107,13 @@
 }
 
 + (void)addEntities {
+
+    // トランザクションをループ内にし事象を起こしやすくする
     RLMRealm *realm = [self.class realm];
-    for (int i = 0; i < 1000; i++) {
+    RLMResults<TestEntity *> *results = [TestEntity allObjectsInRealm:realm];
+    NSLog(@"addEntities: TestEnitity count: %lu", results.count);
+
+    for (int i = 0; i < LOOP_COUNT; i++) {
         [realm transactionWithBlock:^{
             TestEntity *entity = [self.class entityFromRealm:realm];
             entity.id = i;
@@ -93,9 +127,11 @@
 + (void)deleteEntities {
     RLMRealm *realm = [self.class realm];
     RLMResults<TestEntity *> *results = [TestEntity allObjectsInRealm:realm];
+    NSLog(@"deleteEntities: TestEnitity count: %lu", results.count);
+
     NSUInteger count = results.count;
-    if (count > 1000) {
-        count = 1000;
+    if (count > LOOP_COUNT) {
+        count = LOOP_COUNT;
     }
 
     NSMutableArray *entities = [NSMutableArray arrayWithCapacity:count];
@@ -105,6 +141,7 @@
         [entities addObject:results[i]];
     }
 
+    // トランザクションをループ内にし事象を起こしやすくする
     for (int i = 0; i < count; i++) {
         [realm transactionWithBlock:^{
             [realm deleteObject:entities[i]];
