@@ -7,12 +7,52 @@
 //
 
 #import "RealmManager.h"
+#import "PersonEntity.h"
 
 
-static const int LOOP_COUNT = 100;
+static const int LOOP_COUNT = 1000;
+
+@interface RealmManager ()
+
+- (void)addEntitiesForRealm:(RLMRealm *)realm;
+- (void)deleteEntitiesFromRealm:(RLMRealm *)realm;
+
+@end
 
 
 @implementation RealmManager
+
++ (RealmManager *)sharedInstance {
+    static RealmManager *singleInstance;
+
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        singleInstance = [[RealmManager alloc] init];
+    });
+
+    return singleInstance;
+}
+
++ (BOOL)deleteRealm {
+    BOOL result = NO;
+
+    NSURL *fileUrl = [[RLMRealmConfiguration defaultConfiguration] fileURL];
+
+    NSError *error;
+    NSFileManager *manager = [NSFileManager defaultManager];
+
+    if ([manager fileExistsAtPath:[fileUrl path]]) {
+        error = nil;
+        if ([manager removeItemAtURL:fileUrl
+                                error:&error]) {
+            result = YES;
+        } else {
+            // log error
+        }
+    }
+
+    return result;
+}
 
 + (BOOL)compactRealm {
     BOOL result = NO;
@@ -57,8 +97,7 @@ static const int LOOP_COUNT = 100;
     return result;
 }
 
-
-+ (RLMRealm *)realm {
+- (void)logDbInfo {
     static NSMutableDictionary *mainDictionary;
     static NSMutableDictionary *workerDictionary;;
 
@@ -68,7 +107,7 @@ static const int LOOP_COUNT = 100;
         workerDictionary = @{}.mutableCopy;
     });
 
-    RLMRealm *realm = [RLMRealm defaultRealm];
+    RLMRealm *realm = [self defaultRealm];
 
     // Realm instance information
     NSValue *pointer = [NSValue valueWithPointer:(__bridge const void *) realm];
@@ -94,50 +133,82 @@ static const int LOOP_COUNT = 100;
             NSLog(@"--- Worker: New Realm Instance   : %@", pointer);
         }
     }
+}
+
+- (RLMRealm *)defaultRealm {
+    RLMRealm *realm = [RLMRealm defaultRealm];
 
     return realm;
 }
 
 
-+ (TestEntity *)entityFromRealm:(RLMRealm *)realm {
-    TestEntity *entity = [[TestEntity alloc] init];
+- (TestEntity *)testEntity {
+    RLMRealm *realm = [self defaultRealm];
+
+    TestEntity *entity = [TestEntity createInRealm:realm
+                                         withValue:@{ @"id":[NSNumber numberWithInt:0] }];
     [realm addObject:entity];
 
     return entity;
 }
 
-+ (void)addEntities {
+- (void)addEntitiesOnMain {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self addEntitiesForRealm:[self defaultRealm]];
+    });
+}
+
+- (void)deleteEntitiesOnMain {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self deleteEntitiesFromRealm:[self defaultRealm]];
+    });
+}
+
+- (void)addEntitiesOnWorker {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0UL), ^{
+        [self addEntitiesForRealm:[self defaultRealm]];
+    });
+}
+
+- (void)deleteEntitiesOnWorker {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0UL), ^{
+        [self deleteEntitiesFromRealm:[self defaultRealm]];
+    });
+}
+
+
+- (void)addEntitiesForRealm:(RLMRealm *)realm {
+
+    RLMResults<TestEntity *> *results = [TestEntity allObjectsInRealm:realm];
+    NSLog(@"before addEntities: TestEnitity count: %lu", (unsigned long) results.count);
 
     // トランザクションをループ内にし事象を起こしやすくする
-    RLMRealm *realm = [self.class realm];
-    RLMResults<TestEntity *> *results = [TestEntity allObjectsInRealm:realm];
-    NSLog(@"addEntities: TestEnitity count: %lu", results.count);
-
     for (int i = 0; i < LOOP_COUNT; i++) {
         [realm transactionWithBlock:^{
-            TestEntity *entity = [self.class entityFromRealm:realm];
+            TestEntity *entity = [self testEntity];
             entity.id = i;
             entity.title = [NSString stringWithFormat:@"title%d", i];
             entity.desc = [NSString stringWithFormat:@"desc%d", i];
         }
                               error:nil];
     }
+
+    NSLog(@"after addEntities: TestEnitity count: %lu", (unsigned long) results.count);
 }
 
-+ (void)deleteEntities {
-    RLMRealm *realm = [self.class realm];
+- (void)deleteEntitiesFromRealm:(RLMRealm *)realm {
     RLMResults<TestEntity *> *results = [TestEntity allObjectsInRealm:realm];
-    NSLog(@"deleteEntities: TestEnitity count: %lu", results.count);
+    NSLog(@"befor deleteEntities: TestEnitity count: %lu", (unsigned long) results.count);
 
-    NSUInteger count = results.count;
+    int count = (int) results.count;
     if (count > LOOP_COUNT) {
         count = LOOP_COUNT;
     }
 
     NSMutableArray *entities = [NSMutableArray arrayWithCapacity:count];
-    NSUInteger startIndex = results.count - 1;
-    NSUInteger endIndex = results.count - count;
-    for (NSUInteger i = startIndex; i >= endIndex; i--) {
+    int startIndex = (int) results.count - 1;
+    int endIndex = (int) results.count - count;
+    for (int i = startIndex; i >= endIndex; i--) {
         [entities addObject:results[i]];
     }
 
@@ -147,6 +218,23 @@ static const int LOOP_COUNT = 100;
             [realm deleteObject:entities[i]];
         }];
     }
+
+    NSLog(@"after deleteEntities: TestEnitity count: %lu", (unsigned long) results.count);
 }
+
+
+- (void)createOrUpdatePersonTable {
+    RLMRealm *realm = [self defaultRealm];
+    for (int i = 0; i < LOOP_COUNT; i++) {
+        NSString *personId = [NSString stringWithFormat:@"%d", i];
+        NSString *firstName = [NSString stringWithFormat:@"firstName%d", i];
+        NSString *lastName = [NSString stringWithFormat:@"lastName%d", i];
+        [PersonEntity createOrUpdateInRealm:realm
+                                   personId:personId
+                                  firstName:firstName
+                                   lastName:lastName];
+    }
+}
+
 
 @end
