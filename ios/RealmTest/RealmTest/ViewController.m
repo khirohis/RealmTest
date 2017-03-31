@@ -49,17 +49,30 @@
 
 
 - (IBAction)onAddEntities:(id)sender {
-//    dispatch_async(dispatch_get_main_queue(), ^{
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0UL), ^{
-        [RealmManager addEntities];
-    });
+//    static BOOL flipFlop;
+//
+//    if (flipFlop) {
+//        [[RealmManager sharedInstance] addEntitiesOnMain];
+//    } else {
+//        [[RealmManager sharedInstance] addEntitiesOnWorker];
+//    }
+//
+//    [[RealmManager sharedInstance] logDbInfo];
+//    flipFlop = !flipFlop;
+    [[RealmManager sharedInstance] createOrUpdatePersonTable];
 }
 
 - (IBAction)onDeleteEntities:(id)sender {
-//    dispatch_async(dispatch_get_main_queue(), ^{
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0UL), ^{
-        [RealmManager deleteEntities];
-    });
+    static BOOL flipFlop;
+    
+    if (flipFlop) {
+        [[RealmManager sharedInstance] deleteEntitiesOnMain];
+    } else {
+        [[RealmManager sharedInstance] deleteEntitiesOnWorker];
+    }
+    
+    [[RealmManager sharedInstance] logDbInfo];
+    flipFlop = !flipFlop;
 }
 
 - (IBAction)onCompactRealm:(id)sender {
@@ -71,10 +84,10 @@
         LeakReference *leak1 = [[LeakReference alloc] init];
         LeakReference *leak2 = [[LeakReference alloc] init];
 
-        RLMRealm *realm = [RealmManager realm];
+        RLMRealm *realm = [[RealmManager sharedInstance] defaultRealm];
         [realm transactionWithBlock:^{
-            leak1.entity = [RealmManager entityFromRealm:realm];
-            leak2.entity = [RealmManager entityFromRealm:realm];
+            leak1.entity = [[RealmManager sharedInstance] testEntity];
+            leak2.entity = [[RealmManager sharedInstance] testEntity];
         }];
 
         leak1.reference = leak2;
@@ -86,7 +99,7 @@
     if (self.entityReference != nil) {
         self.entityReference = nil;
     } else {
-        RLMRealm *realm = [RealmManager realm];
+        RLMRealm *realm = [[RealmManager sharedInstance] defaultRealm];
         [realm transactionWithBlock:^{
             self.entityReference = [[TestEntity allObjects] firstObject];
         }];

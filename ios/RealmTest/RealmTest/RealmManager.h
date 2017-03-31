@@ -13,12 +13,22 @@
 
 @interface RealmManager : NSObject
 
++ (RealmManager *)sharedInstance;
+
++ (BOOL)deleteRealm;
 + (BOOL)compactRealm;
 
-+ (RLMRealm *)realm;
+- (void)logDbInfo;
 
-+ (TestEntity *)entityFromRealm:(RLMRealm *)realm;
-+ (void)addEntities;
-+ (void)deleteEntities;
+- (RLMRealm *)defaultRealm;
+
+- (TestEntity *)testEntity;
+
+- (void)addEntitiesOnMain;
+- (void)deleteEntitiesOnMain;
+- (void)addEntitiesOnWorker;
+- (void)deleteEntitiesOnWorker;
+
+- (void)createOrUpdatePersonTable;
 
 @end

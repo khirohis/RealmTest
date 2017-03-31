@@ -31,7 +31,7 @@
 }
 
 - (void)reload {
-    RLMRealm *realm = [RealmManager realm];
+    RLMRealm *realm = [[RealmManager sharedInstance] defaultRealm];
     RLMResults *results = [TestEntity allObjectsInRealm:realm];
 
     NSMutableArray *entities = [NSMutableArray arrayWithCapacity:results.count];
