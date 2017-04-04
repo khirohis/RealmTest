@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <Realm/Realm.h>
 #import "TestEntity.h"
-
+#import "PersonEntity.h"
 
 @interface RealmManager : NSObject
 

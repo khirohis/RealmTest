@@ -12,7 +12,7 @@
 
 @interface ArrayTableViewController ()
 
-@property (nonatomic) NSArray<TestEntity *> *entityList;
+@property (nonatomic) NSArray<PersonEntity *> *entityList;
 
 @end
 
@@ -32,10 +32,10 @@
 
 - (void)reload {
     RLMRealm *realm = [[RealmManager sharedInstance] defaultRealm];
-    RLMResults *results = [TestEntity allObjectsInRealm:realm];
+    RLMResults<PersonEntity *> *results = [PersonEntity allObjectsInRealm:realm];
 
     NSMutableArray *entities = [NSMutableArray arrayWithCapacity:results.count];
-    for (TestEntity *entity in results) {
+    for (PersonEntity *entity in results) {
         [entities addObject:entity];
     }
 
@@ -60,36 +60,10 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"
                                                             forIndexPath:indexPath];
 
-    cell.textLabel.text = self.entityList[indexPath.row].title;
+    PersonEntity *entity = self.entityList[indexPath.row];
+    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", entity.firstName, entity.lastName];
 
     return cell;
 }
-
-
-/*
-#pragma mark - Table view delegate
-
-// In a xib-based application, navigation from a table can be handled in -tableView:didSelectRowAtIndexPath:
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Navigation logic may go here, for example:
-    // Create the next view controller.
-    <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:<#@"Nib name"#> bundle:nil];
-    
-    // Pass the selected object to the new view controller.
-    
-    // Push the view controller.
-    [self.navigationController pushViewController:detailViewController animated:YES];
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

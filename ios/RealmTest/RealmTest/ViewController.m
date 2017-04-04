@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "ArrayTableViewController.h"
+#import "ResultTableViewController.h"
 #import "RealmManager.h"
 #import "LeakReference.h"
 
@@ -15,7 +16,7 @@
 @interface ViewController ()
 
 @property (weak, nonatomic) IBOutlet UIView *containerView;
-@property (nonatomic) ArrayTableViewController *childViewController;
+@property (nonatomic) ResultTableViewController *childViewController;
 @property (nonatomic) TestEntity *entityReference;
 
 @end
@@ -26,13 +27,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    self.childViewController = [[ArrayTableViewController alloc] initWithNibName:@"ArrayTableViewController"
+    self.childViewController = [[ResultTableViewController alloc] initWithNibName:@"ArrayTableViewController"
                                                                           bundle:nil];
     [self addChildViewController:self.childViewController];
     [self.view addSubview:self.childViewController.view];
     [self.childViewController didMoveToParentViewController:self];
-    
-//    [self.childViewController reload];
+
+    // RLMObject の参照を作る
+    [self.childViewController reload];
 }
 
 
@@ -59,7 +61,12 @@
 //
 //    [[RealmManager sharedInstance] logDbInfo];
 //    flipFlop = !flipFlop;
-    [[RealmManager sharedInstance] createOrUpdatePersonTable];
+
+    // RLMObject を保持しているときにここを dispatch_get_main_queue にすると数回で例外が発生する
+    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0UL), ^{
+        [[RealmManager sharedInstance] createOrUpdatePersonTable];
+    });
 }
 
 - (IBAction)onDeleteEntities:(id)sender {

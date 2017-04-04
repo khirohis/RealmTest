@@ -19,4 +19,19 @@
                     firstName:(NSString *)firstName
                      lastName:(NSString *)lastName;
 
++ (void)createOrUpdateInRealm1:(RLMRealm *)realm
+                     personId:(NSString *)personId
+                    firstName:(NSString *)firstName
+                     lastName:(NSString *)lastName;
+
++ (void)createOrUpdateInRealm2:(RLMRealm *)realm
+                     personId:(NSString *)personId
+                    firstName:(NSString *)firstName
+                     lastName:(NSString *)lastName;
+
++ (void)createOrUpdateInRealm3:(RLMRealm *)realm
+                     personId:(NSString *)personId
+                    firstName:(NSString *)firstName
+                     lastName:(NSString *)lastName;
+
 @end

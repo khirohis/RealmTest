@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8A08B0C91E920FAD0009376D /* ResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A08B0C81E920FAD0009376D /* ResultTableViewController.m */; };
 		8A442C211E7BE8B900A20EFA /* LeakReference.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A442C201E7BE8B900A20EFA /* LeakReference.m */; };
 		8A934CD91E88BC4500DF6B4D /* PersonEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A934CD81E88BC4500DF6B4D /* PersonEntity.m */; };
 		8AA6F31E1E824C9F001DF6C0 /* ArrayTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6F31C1E824C9F001DF6C0 /* ArrayTableViewController.m */; };
@@ -37,6 +38,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8A08B0C71E920FAD0009376D /* ResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResultTableViewController.h; sourceTree = "<group>"; };
+		8A08B0C81E920FAD0009376D /* ResultTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ResultTableViewController.m; sourceTree = "<group>"; };
 		8A442C1F1E7BE8B900A20EFA /* LeakReference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeakReference.h; sourceTree = "<group>"; };
 		8A442C201E7BE8B900A20EFA /* LeakReference.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeakReference.m; sourceTree = "<group>"; };
 		8A934CD71E88BC4500DF6B4D /* PersonEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersonEntity.h; sourceTree = "<group>"; };
@@ -103,6 +106,8 @@
 				8AFFCD2A1E78FD9000DB5F0E /* TestEntity.m */,
 				8A442C1F1E7BE8B900A20EFA /* LeakReference.h */,
 				8A442C201E7BE8B900A20EFA /* LeakReference.m */,
+				8A08B0C71E920FAD0009376D /* ResultTableViewController.h */,
+				8A08B0C81E920FAD0009376D /* ResultTableViewController.m */,
 				8AA6F31B1E824C9F001DF6C0 /* ArrayTableViewController.h */,
 				8AA6F31C1E824C9F001DF6C0 /* ArrayTableViewController.m */,
 				8AA6F31D1E824C9F001DF6C0 /* ArrayTableViewController.xib */,
@@ -202,6 +207,7 @@
 				8AFFCD151E78FA2100DB5F0E /* ViewController.m in Sources */,
 				8AA6F31E1E824C9F001DF6C0 /* ArrayTableViewController.m in Sources */,
 				8AFFCD2B1E78FD9000DB5F0E /* TestEntity.m in Sources */,
+				8A08B0C91E920FAD0009376D /* ResultTableViewController.m in Sources */,
 				8AFFCD271E78FBB900DB5F0E /* RealmManager.m in Sources */,
 				8A934CD91E88BC4500DF6B4D /* PersonEntity.m in Sources */,
 				8AFFCD121E78FA2100DB5F0E /* AppDelegate.m in Sources */,
@@ -331,7 +337,7 @@
 				INFOPLIST_FILE = RealmTest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = jp.co.plala.RealmTest;
+				PRODUCT_BUNDLE_IDENTIFIER = net.hogelab.ios.RealmTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -348,7 +354,7 @@
 				INFOPLIST_FILE = RealmTest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = jp.co.plala.RealmTest;
+				PRODUCT_BUNDLE_IDENTIFIER = net.hogelab.ios.RealmTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
