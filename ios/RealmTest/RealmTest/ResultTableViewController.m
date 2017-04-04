@@ -1,23 +1,21 @@
 //
-//  ArrayTableViewController.m
+//  ResultTableViewController.m
 //  RealmTest
 //
-//  Created by Hirohisa Kobayasi on 2017/03/22.
+//  Created by Hirohisa Kobayasi on 2017/04/03.
 //  Copyright © 2017年 Hirohisa Kobayasi. All rights reserved.
 //
 
-#import "ArrayTableViewController.h"
+#import "ResultTableViewController.h"
 #import "RealmManager.h"
 
+@interface ResultTableViewController ()
 
-@interface ArrayTableViewController ()
-
-@property (nonatomic) NSArray<PersonEntity *> *entityList;
+@property (nonatomic) RLMResults<PersonEntity *> *entityList;
 
 @end
 
-
-@implementation ArrayTableViewController
+@implementation ResultTableViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -34,12 +32,7 @@
     RLMRealm *realm = [[RealmManager sharedInstance] defaultRealm];
     RLMResults<PersonEntity *> *results = [PersonEntity allObjectsInRealm:realm];
 
-    NSMutableArray *entities = [NSMutableArray arrayWithCapacity:results.count];
-    for (PersonEntity *entity in results) {
-        [entities addObject:entity];
-    }
-
-    self.entityList = [entities copy];
+    self.entityList = results;
 
     [self.tableView reloadData];
 }
@@ -50,8 +43,7 @@
     return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView
- numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.entityList.count;
 }
 

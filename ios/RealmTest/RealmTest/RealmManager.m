@@ -10,7 +10,7 @@
 #import "PersonEntity.h"
 
 
-static const int LOOP_COUNT = 1000;
+static const int LOOP_COUNT = 10;
 
 @interface RealmManager ()
 
@@ -98,6 +98,17 @@ static const int LOOP_COUNT = 1000;
 }
 
 - (void)logDbInfo {
+    // Realm instance information
+    NSURL *dbPath = [[RLMRealmConfiguration defaultConfiguration] fileURL];
+    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:dbPath.path
+                                                                                error:nil];
+    NSNumber *fileSize = [attributes objectForKey:NSFileSize];
+
+    NSLog(@"Realm DB Path : %@", dbPath);
+    NSLog(@"Realm DB Size: %lld bytes", [fileSize longLongValue]);
+}
+
+- (RLMRealm *)defaultRealm {
     static NSMutableDictionary *mainDictionary;
     static NSMutableDictionary *workerDictionary;;
 
@@ -107,17 +118,9 @@ static const int LOOP_COUNT = 1000;
         workerDictionary = @{}.mutableCopy;
     });
 
-    RLMRealm *realm = [self defaultRealm];
+    RLMRealm *realm = [RLMRealm defaultRealm];
 
-    // Realm instance information
     NSValue *pointer = [NSValue valueWithPointer:(__bridge const void *) realm];
-    NSURL *dbPath = [[RLMRealmConfiguration defaultConfiguration] fileURL];
-    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:dbPath.path
-                                                                                error:nil];
-    NSNumber *fileSize = [attributes objectForKey:NSFileSize];
-
-    NSLog(@"Realm DB Path : %@", dbPath);
-    NSLog(@"Realm DB Size: %lld bytes", [fileSize longLongValue]);
     if ([NSThread isMainThread]) {
         if (mainDictionary[pointer] != nil) {
             NSLog(@"--- Main  : Exists Realm Instance: %@", pointer);
@@ -133,10 +136,6 @@ static const int LOOP_COUNT = 1000;
             NSLog(@"--- Worker: New Realm Instance   : %@", pointer);
         }
     }
-}
-
-- (RLMRealm *)defaultRealm {
-    RLMRealm *realm = [RLMRealm defaultRealm];
 
     return realm;
 }
@@ -147,7 +146,15 @@ static const int LOOP_COUNT = 1000;
 
     TestEntity *entity = [TestEntity createInRealm:realm
                                          withValue:@{ @"id":[NSNumber numberWithInt:0] }];
-    [realm addObject:entity];
+
+    return entity;
+}
+
+- (PersonEntity *)personEntity {
+    RLMRealm *realm = [self defaultRealm];
+
+    PersonEntity *entity = [PersonEntity createInRealm:realm
+                                             withValue:@{ @"personId":[NSNumber numberWithInt:0] }];
 
     return entity;
 }
@@ -229,11 +236,14 @@ static const int LOOP_COUNT = 1000;
         NSString *personId = [NSString stringWithFormat:@"%d", i];
         NSString *firstName = [NSString stringWithFormat:@"firstName%d", i];
         NSString *lastName = [NSString stringWithFormat:@"lastName%d", i];
+
         [PersonEntity createOrUpdateInRealm:realm
                                    personId:personId
                                   firstName:firstName
                                    lastName:lastName];
     }
+
+    [self logDbInfo];
 }
 
 
